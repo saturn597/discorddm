@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "blessed": "^0.1.81",
     "discord.js": "^11.3.2"
   }
 }
