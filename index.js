@@ -8,6 +8,9 @@ const token = secrets.token;
 
 const client = new Discord.Client();
 
+// Default number of messages to show in history. This could be configurable.
+const MAX_MESSAGES = 50;
+
 const screen = blessed.screen({ smartCSR: true });
 screen.title = 'Discord';
 
@@ -21,6 +24,7 @@ const main = blessed.box({
     type: 'line',
   },
   content: 'Connecting...',
+  tags: true,
 
   height: '90%-1',
   width: '80%-1',
@@ -57,8 +61,8 @@ friendList.on('select', e => {
   const u = client.user.friends.
     find(u => u.username == arr[0] && u.discriminator == arr[1]);
   if (u.dmChannel) {
-    u.dmChannel.fetchMessages().then(messages => {
-      main.setContent(messages.map(m => m.cleanContent).join('\n'));
+    u.dmChannel.fetchMessages({ max: MAX_MESSAGES }).then(messages => {
+      main.setContent(messagesToString(messages));
       screen.render();
     });
   } else {
@@ -84,3 +88,16 @@ client.login(token).
       console.log('Login unsuccessful. Maybe your token is incorrect?');
       process.exit();
   });
+
+
+function messagesToString(messages) {
+    return messages.array().
+      sort((m1, m2) => m1.createdAt > m2.createdAt ? 1 : -1).
+      map(messageToString).
+      join('\n');
+}
+
+function messageToString(m) {
+  return `{bold}${m.author.username}#${m.author.discriminator}{/bold}: `+
+    m.cleanContent;
+}
