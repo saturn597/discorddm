@@ -24,6 +24,7 @@ const main = blessed.box({
     type: 'line',
   },
   content: 'Connecting...',
+  style: getBasicStyle(),
   tags: true,
 
   height: '90%-1',
@@ -34,6 +35,7 @@ const input = blessed.box({
   border: {
     type: 'line',
   },
+  style: getBasicStyle(),
 
   top: '90%',
   height: '10%',
@@ -45,16 +47,16 @@ const friendList = blessed.list({
     type: 'line',
   },
   keys: true,
-  style: {
-    selected: {
-      bg: 'magenta',
-    },
-  },
+  style: getBasicStyle(),
 
   left: '80%',
   height: '99%',
   width: '20%',
 });
+
+friendList.style.selected = {
+  bg: 'magenta'
+};
 
 friendList.on('select', e => {
   const arr = e.content.split('#');
@@ -72,7 +74,6 @@ friendList.on('select', e => {
 });
 
 [main, input, friendList].forEach(e => screen.append(e));
-
 screen.render();
 
 client.on('ready', () => {
@@ -89,6 +90,21 @@ client.login(token).
       process.exit();
   });
 
+
+function getBasicStyle() {
+  // Using a function to fetch a new version of the style for each widget.
+  // Having a single shared object causes issues.
+  return  {
+    border: {
+      fg: 'white',
+    },
+    focus: {
+      border: {
+        fg: 'green',
+      },
+    },
+  }
+}
 
 function messagesToString(messages) {
     return messages.array().
