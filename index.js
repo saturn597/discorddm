@@ -73,13 +73,22 @@ friendList.on('select', e => {
   }
 });
 
+const focusables = [input, friendList];
+let index = 0;
+focusables[index].focus();
+screen.key('tab', () => {
+  // switch focus between different boxes
+  index = index < focusables.length - 1 ? index + 1 : 0;
+  focusables[index].focus();
+  screen.render();
+});
+
 [main, input, friendList].forEach(e => screen.append(e));
 screen.render();
 
 client.on('ready', () => {
   friendList.setItems(
       client.user.friends.map(f => f.username + '#' + f.discriminator));
-  friendList.focus();
   screen.render();
 });
 
