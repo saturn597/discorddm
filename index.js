@@ -1,7 +1,5 @@
 const blessed = require('blessed');
 const Discord = require('discord.js');
-const readline = require('readline');
-const snekfetch = require('snekfetch');
 
 const secrets = require('./secrets.js');
 const token = secrets.token;
