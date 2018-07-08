@@ -3,124 +3,68 @@ const Discord = require('discord.js');
 
 const secrets = require('./secrets.js');
 const token = secrets.token;
-
-const client = new Discord.Client();
+const ConversationDisplay = require('./ConversationDisplay.js');
+const ConversationManager = require('./ConversationManager.js');
+const styles = require('./styles.js');
 
 // Default number of messages to show in history. This could be configurable.
 const MAX_MESSAGES = 50;
 
-const screen = blessed.screen({ smartCSR: true });
-screen.title = 'Discord';
 
-// Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], function(ch, key) {
-  return process.exit(0);
-});
+class DiscordDM {
+  constructor() {
+    const client = new Discord.Client();
+    const conversationManager = new ConversationManager(client, MAX_MESSAGES);
 
-const main = blessed.box({
-  border: {
-    type: 'line',
-  },
-  content: 'Connecting...',
-  style: getBasicStyle(),
-  tags: true,
+    const screen = blessed.screen({ smartCSR: true });
+    screen.title = 'Discord';
 
-  height: '90%-1',
-  width: '80%-1',
-});
+    // Quit on Escape, q, or Control-C.
+    screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+      return process.exit(0);
+    });
 
-const input = blessed.box({
-  border: {
-    type: 'line',
-  },
-  style: getBasicStyle(),
+    const friendList = blessed.list(styles.friendList);
+    const messages = new ConversationDisplay(styles.messages);
+    const input = blessed.box(styles.input);
 
-  top: '90%',
-  height: '10%',
-  width: '80%-1',
-});
+    friendList.on('select', e => {
+      const arr = e.content.split('#');
+      const u = client.user.friends.
+        find(u => u.username == arr[0] && u.discriminator == arr[1]);
+      conversationManager.getConversation(u).then((ms) => {
+        messages.display(ms);
+        screen.render();
+      });
+    });
 
-const friendList = blessed.list({
-  border: {
-    type: 'line',
-  },
-  keys: true,
-  style: getBasicStyle(),
-
-  left: '80%',
-  height: '99%',
-  width: '20%',
-});
-
-friendList.style.selected = {
-  bg: 'magenta'
-};
-
-friendList.on('select', e => {
-  const arr = e.content.split('#');
-  const u = client.user.friends.
-    find(u => u.username == arr[0] && u.discriminator == arr[1]);
-  if (u.dmChannel) {
-    u.dmChannel.fetchMessages({ max: MAX_MESSAGES }).then(messages => {
-      main.setContent(messagesToString(messages));
+    const focusables = [input, friendList];
+    let index = 0;
+    focusables[index].focus();
+    screen.key('tab', () => {
+      // switch focus between different boxes
+      index = index < focusables.length - 1 ? index + 1 : 0;
+      focusables[index].focus();
       screen.render();
     });
-  } else {
-    main.setContent('<No message history>');
+
+    [messages, input, friendList].forEach(e => screen.append(e));
     screen.render();
-  }
-});
 
-const focusables = [input, friendList];
-let index = 0;
-focusables[index].focus();
-screen.key('tab', () => {
-  // switch focus between different boxes
-  index = index < focusables.length - 1 ? index + 1 : 0;
-  focusables[index].focus();
-  screen.render();
-});
+    client.on('ready', () => {
+      const friends = client.user.friends;
+      friendList.setItems(friends.map(f => f.username + '#' + f.discriminator));
+      screen.render();
+    });
 
-[main, input, friendList].forEach(e => screen.append(e));
-screen.render();
-
-client.on('ready', () => {
-  friendList.setItems(
-      client.user.friends.map(f => f.username + '#' + f.discriminator));
-  screen.render();
-});
-
-client.login(token).
-  catch((e) => {
-      screen.destroy();
-      console.log('Login unsuccessful. Maybe your token is incorrect?');
-      process.exit();
-  });
-
-
-function getBasicStyle() {
-  // Using a function to fetch a new version of the style for each widget.
-  // Having a single shared object causes issues.
-  return  {
-    border: {
-      fg: 'white',
-    },
-    focus: {
-      border: {
-        fg: 'green',
-      },
-    },
-  }
+    client.login(token).
+      catch((e) => {
+          screen.destroy();
+          console.log('Login unsuccessful. Maybe your token is incorrect?');
+          process.exit();
+      });
+    }
 }
 
-function messagesToString(messages) {
-    return messages.array().
-      sort((m1, m2) => m1.createdAt > m2.createdAt ? 1 : -1).
-      map(messageToString).
-      join('\n');
-}
 
-function messageToString(m) {
-  return `{bold}${m.author.username}#${m.author.discriminator}{/bold}: `+
-    m.cleanContent;
-}
+new DiscordDM();
