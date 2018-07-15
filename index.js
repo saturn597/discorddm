@@ -18,6 +18,7 @@ class DiscordDM {
 
     const screen = blessed.screen({ smartCSR: true });
     screen.title = 'Discord';
+    const rerender = screen.render.bind(screen);
 
     // Quit on Escape, q, or Control-C.
     screen.key(['escape', 'q', 'C-c'], function(ch, key) {
@@ -25,7 +26,7 @@ class DiscordDM {
     });
 
     const friendList = blessed.list(styles.friendList);
-    const messages = new ConversationDisplay(styles.messages);
+    const messages = new ConversationDisplay(rerender, styles.messages);
     const input = blessed.box(styles.input);
 
     friendList.on('select', e => {
@@ -38,7 +39,7 @@ class DiscordDM {
       });
     });
 
-    const focusables = [input, friendList];
+    const focusables = [input, messages, friendList];
     let index = 0;
     focusables[index].focus();
     screen.key('tab', () => {

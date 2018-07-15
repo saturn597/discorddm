@@ -2,8 +2,20 @@ const blessed = require('blessed');
 
 
 class ConversationDisplay extends blessed.Box {
-  constructor(...args) {
+  constructor(rerender, ...args) {
     super(...args);
+
+    this.rerender = rerender;
+
+    this.key('up', () => {
+      this.scroll(-1);
+      this.rerender();
+    });
+
+    this.key('down', () => {
+      this.scroll(1);
+      this.rerender();
+    });
   }
 
   display(messages) {
@@ -12,6 +24,8 @@ class ConversationDisplay extends blessed.Box {
     } else {
       this.setContent('<No message history>');
     }
+
+    this.setScrollPerc(100);
   }
 
   messagesToString(messages) {

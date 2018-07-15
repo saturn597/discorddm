@@ -10,22 +10,28 @@ const friendList = {
   width: '20%',
 };
 
-// TODO: this should go in styles.js.
 friendList.style.selected = {
   bg: 'magenta'
 };
 
 const messages = {
+  alwaysScroll: true,
   border: {
     type: 'line',
   },
   content: 'Connecting...',
+  scrollable: true,
+  scrollbar: true,
   style: getBasicStyle(),
   tags: true,
 
   height: '90%-1',
   width: '80%-1',
 };
+
+messages.style.scrollbar = {
+  bg: 'blue',
+}
 
 const input = {
   border: {
