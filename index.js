@@ -33,7 +33,7 @@ class DiscordDM {
       const arr = e.content.split('#');
       const u = client.user.friends.
         find(u => u.username == arr[0] && u.discriminator == arr[1]);
-      conversationManager.getConversation(u).then((ms) => {
+      conversationManager.friendToConversation(u).then((ms) => {
         messages.display(ms);
         screen.render();
       });
