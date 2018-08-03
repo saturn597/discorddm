@@ -5,6 +5,7 @@ const secrets = require('./secrets.js');
 const token = secrets.token;
 const ConversationDisplay = require('./ConversationDisplay.js');
 const ConversationManager = require('./ConversationManager.js');
+const FriendsList = require('./FriendsList.js');
 const styles = require('./styles.js');
 
 // Default number of messages to show in history. This could be configurable.
@@ -25,19 +26,17 @@ class DiscordDM {
       return process.exit(0);
     });
 
-    const friendList = blessed.list(styles.friendList);
-    const messages = new ConversationDisplay(rerender, styles.messages);
-    const input = blessed.box(styles.input);
-
-    friendList.on('select', e => {
-      const arr = e.content.split('#');
-      const u = client.user.friends.
-        find(u => u.username == arr[0] && u.discriminator == arr[1]);
-      conversationManager.friendToConversation(u).then((ms) => {
+    // TODO: consider making another method of DiscordDM
+    const onFriendSwitch = u => {
+      conversationManager.friendToConversation(u).then(ms => {
         messages.display(ms);
         screen.render();
       });
-    });
+    };
+
+    const friendList = new FriendsList(onFriendSwitch, styles.friendList);
+    const messages = new ConversationDisplay(rerender, styles.messages);
+    const input = blessed.box(styles.input);
 
     const focusables = [input, messages, friendList];
     let index = 0;
@@ -53,8 +52,8 @@ class DiscordDM {
     screen.render();
 
     client.on('ready', () => {
-      const friends = client.user.friends;
-      friendList.setItems(friends.map(f => f.username + '#' + f.discriminator));
+      // TODO: update on adding/removing friends
+      friendList.setFriends(client.user.friends);
       screen.render();
     });
 
