@@ -63,7 +63,7 @@ class DiscordDM {
           console.log('Login unsuccessful. Maybe your token is incorrect?');
           process.exit();
       });
-    }
+  }
 }
 
 

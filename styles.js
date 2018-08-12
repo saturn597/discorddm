@@ -4,6 +4,7 @@ const friendList = {
   },
   keys: true,
   style: getBasicStyle(),
+  tags: true,
 
   left: '80%',
   height: '99%',

@@ -27,7 +27,7 @@ class ConversationManager {
     // TODO: potential case to handle: if this is called >1 time before the
     // messages come back from Discord, maybe we wait for the first message
     // to be resolved rather than fetching from Discord twice.
-    return channel.fetchMessages({ max: this.maxMessages}).
+    return channel.fetchMessages({ max: this.maxMessages }).
       then(messages => {
         this.conversations.set(channel, messages);
         return messages;
