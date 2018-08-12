@@ -1,17 +1,18 @@
 const blessed = require('blessed');
 
 class FriendList extends blessed.List {
-  constructor(onSwitch, ...args) {
+  constructor(...args) {
     super(...args);
     this.friends = new Map();
     this.highlighted = new Set();
-    // onSwitch is a function called whenever the user switches friends. It'll
-    // be called with one argument, the friend switched to.
-    this.onSwitch = onSwitch;
 
-    this.on('select', e => {
+    this.on('select item', e => {
+      // blessed.List emits a "select item" event after a new list item is
+      // selected. But we want events that send the friend object to the
+      // receiver, rather than just sending the blessed "element." So,
+      // emitting a special friendSelect event.
       const friendSelected = this.friends.get(blessed.stripTags(e.content));
-      onSwitch(friendSelected);
+      this.emit('friendSelect', friendSelected);
     });
   }
 

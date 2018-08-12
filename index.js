@@ -34,7 +34,8 @@ class DiscordDM {
       });
     };
 
-    const friendList = new FriendList(onFriendSwitch, styles.friendList);
+    const friendList = new FriendList(styles.friendList);
+    friendList.on('friendSelect', onFriendSwitch);
     const messages = new ConversationDisplay(rerender, styles.messages);
     const input = blessed.box(styles.input);
 
