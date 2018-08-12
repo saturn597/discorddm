@@ -1,6 +1,6 @@
 const blessed = require('blessed');
 
-class FriendsList extends blessed.List {
+class FriendList extends blessed.List {
   constructor(onSwitch, ...args) {
     super(...args);
     this.friends = new Map();
@@ -49,4 +49,4 @@ class FriendsList extends blessed.List {
   }
 }
 
-module.exports = FriendsList;
+module.exports = FriendList;

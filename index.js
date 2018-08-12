@@ -5,7 +5,7 @@ const secrets = require('./secrets.js');
 const token = secrets.token;
 const ConversationDisplay = require('./ConversationDisplay.js');
 const ConversationManager = require('./ConversationManager.js');
-const FriendsList = require('./FriendsList.js');
+const FriendList = require('./FriendList.js');
 const styles = require('./styles.js');
 
 // Default number of messages to show in history. This could be configurable.
@@ -34,7 +34,7 @@ class DiscordDM {
       });
     };
 
-    const friendList = new FriendsList(onFriendSwitch, styles.friendList);
+    const friendList = new FriendList(onFriendSwitch, styles.friendList);
     const messages = new ConversationDisplay(rerender, styles.messages);
     const input = blessed.box(styles.input);
 
