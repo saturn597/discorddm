@@ -6,14 +6,36 @@ class FriendList extends blessed.List {
     this.friends = new Map();
     this.highlighted = new Set();
 
-    this.on('select item', e => {
-      // blessed.List emits a "select item" event after a new list item is
-      // selected. But we want events that send the friend object to the
-      // receiver, rather than just sending the blessed "element." So,
-      // emitting a special friendSelect event.
-      const friendSelected = this.friends.get(blessed.stripTags(e.content));
-      this.emit('friendSelect', friendSelected);
+    // blessed.List emits a "select" event but it only fires when the user
+    // completes a the selection (i.e., when pressing return when keys are
+    // enabled). We want an event to fire every time the user switches between
+    // friends, for more responsiveness. Also, "select" only sends the element
+    // that was selected, rather than the friend object we want. Using a
+    // custom "friendSelect" event for this.
+    this.on('keypress', function(ch, key) {
+      if (key.name === 'up') {
+        this.up();
+        this.screen.render();
+        this.emit('friendSelect', this.getCurrentSelection());
+        return;
+      }
+      if (key.name === 'down') {
+        this.down();
+        this.screen.render();
+        this.emit('friendSelect', this.getCurrentSelection());
+        return;
+      }
     });
+  }
+
+  friendSelect(index) {
+    this.select(index);
+    this.emit('friendSelect', this.getCurrentSelection());
+  }
+
+  getCurrentSelection() {
+    const name = blessed.stripTags(this.items[this.selected].content);
+    return this.friends.get(name);
   }
 
   highlight(friend, state=true) {

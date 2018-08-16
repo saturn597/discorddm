@@ -2,7 +2,6 @@ const friendList = {
   border: {
     type: 'line',
   },
-  keys: true,
   style: getBasicStyle(),
   tags: true,
 

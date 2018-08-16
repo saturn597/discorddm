@@ -55,6 +55,7 @@ class DiscordDM {
     client.on('ready', () => {
       // TODO: update on adding/removing friends
       friendList.setFriends(client.user.friends);
+      friendList.friendSelect(0);
       screen.render();
     });
 
