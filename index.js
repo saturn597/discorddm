@@ -14,11 +14,16 @@ const MAX_MESSAGES = 50;
 
 class DiscordDM {
   constructor() {
+    this.onMessage = this.onMessage.bind(this);
+
     const client = new Discord.Client();
-    const conversationManager = new ConversationManager(client, MAX_MESSAGES);
+    const conversationManager = new ConversationManager(client, MAX_MESSAGES,
+        this.onMessage);
+    this.conversationManager = conversationManager;
 
     const screen = blessed.screen({ smartCSR: true });
     screen.title = 'Discord';
+    this.screen = screen;
     const rerender = screen.render.bind(screen);
 
     // Quit on Escape, q, or Control-C.
@@ -28,6 +33,7 @@ class DiscordDM {
 
     // TODO: consider making another method of DiscordDM
     const onFriendSwitch = u => {
+      this.friendList.highlight(u, false);
       conversationManager.friendToConversation(u).then(ms => {
         messages.display(ms);
         screen.render();
@@ -35,8 +41,10 @@ class DiscordDM {
     };
 
     const friendList = new FriendList(styles.friendList);
+    this.friendList = friendList;
     friendList.on('friendSelect', onFriendSwitch);
     const messages = new ConversationDisplay(rerender, styles.messages);
+    this.messages = messages;
     const input = blessed.box(styles.input);
 
     const focusables = [input, messages, friendList];
@@ -65,6 +73,22 @@ class DiscordDM {
           console.log('Login unsuccessful. Maybe your token is incorrect?');
           process.exit();
       });
+  }
+
+  onMessage(msg) {
+    if (msg.author != this.friendList.getCurrentSelection()) {
+      // Highlight the friend who sent the message, if we're not already
+      // viewing their messages
+      this.friendList.highlight(msg.author);
+      this.screen.render();
+    } else {
+      // If we currently have the message's author selected, need to show their new
+      // messages
+      this.conversationManager.friendToConversation(msg.author).then(ms => {
+        this.messages.display(ms);
+        this.screen.render();
+      });
+    }
   }
 }
 
