@@ -2,19 +2,17 @@ const blessed = require('blessed');
 
 
 class ConversationDisplay extends blessed.Box {
-  constructor(rerender, ...args) {
+  constructor(...args) {
     super(...args);
-
-    this.rerender = rerender;
 
     this.key('up', () => {
       this.scroll(-1);
-      this.rerender();
+      this.screen.render();
     });
 
     this.key('down', () => {
       this.scroll(1);
-      this.rerender();
+      this.screen.render();
     });
   }
 
