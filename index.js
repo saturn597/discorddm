@@ -15,6 +15,7 @@ const MAX_MESSAGES = 50;
 class DiscordDM {
   constructor() {
     this.onMessage = this.onMessage.bind(this);
+    this.onFriendSwitch = this.onFriendSwitch.bind(this);
 
     const client = new Discord.Client();
     const conversationManager = new ConversationManager(client, MAX_MESSAGES,
@@ -30,18 +31,9 @@ class DiscordDM {
       return process.exit(0);
     });
 
-    // TODO: consider making another method of DiscordDM
-    const onFriendSwitch = u => {
-      this.friendList.highlight(u, false);
-      conversationManager.friendToConversation(u).then(ms => {
-        messages.display(ms);
-        screen.render();
-      });
-    };
-
     const friendList = new FriendList(styles.friendList);
     this.friendList = friendList;
-    friendList.on('friendSelect', onFriendSwitch);
+    friendList.on('friendSelect', this.onFriendSwitch);
     const messages = new ConversationDisplay(styles.messages);
     this.messages = messages;
     const input = blessed.box(styles.input);
@@ -88,6 +80,14 @@ class DiscordDM {
         this.screen.render();
       });
     }
+  }
+
+  onFriendSwitch(u) {
+    this.friendList.highlight(u, false);
+    this.conversationManager.friendToConversation(u).then(ms => {
+      this.messages.display(ms);
+      this.screen.render();
+    });
   }
 }
 
