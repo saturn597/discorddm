@@ -38,6 +38,7 @@ class FriendList extends blessed.List {
     return this.friends.get(name);
   }
 
+
   highlight(friend, state=true) {
     if (state) {
       this.highlighted.add(friend);

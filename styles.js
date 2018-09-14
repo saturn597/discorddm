@@ -37,6 +37,8 @@ const input = {
   border: {
     type: 'line',
   },
+  inputOnFocus: false,
+  keys: false,
   style: getBasicStyle(),
 
   top: '90%',

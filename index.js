@@ -6,6 +6,7 @@ const token = secrets.token;
 const ConversationDisplay = require('./ConversationDisplay.js');
 const ConversationManager = require('./ConversationManager.js');
 const FriendList = require('./FriendList.js');
+const MessageInput = require('./MessageInput.js');
 const styles = require('./styles.js');
 
 // Default number of messages to show in history. This could be configurable.
@@ -30,23 +31,24 @@ class DiscordDM {
     screen.key(['escape', 'q', 'C-c'], function(ch, key) {
       return process.exit(0);
     });
+    screen.ignoreLocked = ['C-c', 'escape', 'tab'];
 
     const friendList = new FriendList(styles.friendList);
     this.friendList = friendList;
     friendList.on('friendSelect', this.onFriendSwitch);
     const messages = new ConversationDisplay(styles.messages);
     this.messages = messages;
-    const input = blessed.box(styles.input);
+    const input = new MessageInput(this.sendMessage.bind(this), styles.input);
 
     const focusables = [input, messages, friendList];
-    let index = 0;
+    let index = 1;
     focusables[index].focus();
     screen.key('tab', () => {
       // switch focus between different boxes
       index = index < focusables.length - 1 ? index + 1 : 0;
       focusables[index].focus();
       screen.render();
-    });
+		});
 
     [messages, input, friendList].forEach(e => screen.append(e));
     screen.render();
@@ -67,7 +69,10 @@ class DiscordDM {
   }
 
   onMessage(msg) {
-    if (msg.author != this.friendList.getCurrentSelection()) {
+    const currentFriend = this.friendList.getCurrentSelection();
+    // TODO: is there a case where currentFriend doesn't have a dmChannel?
+    // (dmChannels can be deleted).
+    if (currentFriend.dmChannel !== msg.channel) {
       // Highlight the friend who sent the message, if we're not already
       // viewing their messages
       this.friendList.highlight(msg.author);
@@ -75,7 +80,7 @@ class DiscordDM {
     } else {
       // If we currently have the message's author selected, need to show their new
       // messages
-      this.conversationManager.friendToConversation(msg.author).then(ms => {
+      this.conversationManager.friendToConversation(currentFriend).then(ms => {
         this.messages.display(ms);
         this.screen.render();
       });
@@ -88,6 +93,10 @@ class DiscordDM {
       this.messages.display(ms);
       this.screen.render();
     });
+  }
+
+  sendMessage(txt) {
+    this.friendList.getCurrentSelection().send(txt);
   }
 }
 
