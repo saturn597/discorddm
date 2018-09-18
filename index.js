@@ -1,8 +1,7 @@
 const blessed = require('blessed');
 const Discord = require('discord.js');
+const fs = require('fs');
 
-const secrets = require('./secrets.js');
-const token = secrets.token;
 const ConversationDisplay = require('./ConversationDisplay.js');
 const ConversationManager = require('./ConversationManager.js');
 const FriendList = require('./FriendList.js');
@@ -12,6 +11,7 @@ const styles = require('./styles.js');
 // Default number of messages to show in history. This could be configurable.
 const MAX_MESSAGES = 50;
 
+const token = fs.readFileSync('./token', 'ascii').trim();
 
 class DiscordDM {
   constructor() {
