@@ -11,10 +11,11 @@ const styles = require('./styles.js');
 // Default number of messages to show in history. This could be configurable.
 const MAX_MESSAGES = 50;
 
-const token = fs.readFileSync('./token', 'ascii').trim();
+const tokenPath = './token';
+
 
 class DiscordDM {
-  constructor() {
+  constructor(token) {
     this.onMessage = this.onMessage.bind(this);
     this.onFriendSwitch = this.onFriendSwitch.bind(this);
 
@@ -62,9 +63,9 @@ class DiscordDM {
 
     client.login(token).
       catch((e) => {
-          screen.destroy();
-          console.log('Login unsuccessful. Maybe your token is incorrect?');
-          process.exit();
+        screen.destroy();
+        console.log('\nLogin unsuccessful. Maybe your token is incorrect?\n');
+        process.exit();
       });
   }
 
@@ -101,4 +102,15 @@ class DiscordDM {
 }
 
 
-new DiscordDM();
+fs.readFile(tokenPath, 'ascii', (e, token) => {
+  if (e) {
+    console.log(
+        '\nError opening token file!\n' +
+        '------------------------\n' +
+        'Put your Discord secret token in a plain text file called "token".\n' +
+        'Put that file in the same directory as index.js. Then try again.\n');
+    process.exit();
+  } else {
+    new DiscordDM(token.trim());
+  }
+});
