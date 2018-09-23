@@ -1,6 +1,6 @@
-DiscordPM
+DiscordDM
 ======================
-A client for sending and receiving PMs in Discord. (Very incomplete).
+A client for sending and receiving DMs in Discord. (Very incomplete).
 
 
 Installation
